@@ -1,9 +1,11 @@
-import sqlite3
+from sqlite3 import connect
 
 
-class dbHandler:
-    def __init__(self, dbPath):
-        self.path = dbPath
+class Query:
+    flag_for_db = False
+
+    def __init__(self):
+        self.path = '.\db\data.db'
         self.conn = None
 
     def getPath(self):
@@ -11,11 +13,11 @@ class dbHandler:
 
     def connect(self):
         try:
-            conn = sqlite3.connect(self.path)
-            self.conn = conn  # .cursor()
+            conn = connect(self.path)
+            self.conn = conn
             return self.conn
-        except Exception as err:
-            print('connection error:', err)
+        except:
+            print('connection error')
             return -1
 
     def disconnect(self):
@@ -23,12 +25,21 @@ class dbHandler:
             self.conn.close()
             print("disconnected from database")
 
-    def select(self, query):
-        cur = self.conn.cursor()
-        cur.execute(query)
-        rs = cur.fetchall()
-        self.disconnect()
-        return rs
+    def select(self):
+        try:
+            cur = self.conn.cursor()
+            cur.execute('SELECT * from graph ORDER BY "InvoiceDate"')
+            res = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()]
+            return res
+
+        except Exception as err:
+            print(err)
+            return []
 
 
-dbHandler()
+# if __name__ == '__main__':
+#     Query.status = False
+#     dbHandler = Query()
+#     dbHandler.connect()
+#     data_from_db = dbHandler.select()
+#     print(data_from_db)
